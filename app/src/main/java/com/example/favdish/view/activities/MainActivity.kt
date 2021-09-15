@@ -1,4 +1,4 @@
-package com.example.favdish.activities
+package com.example.favdish.view.activities
 
 import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView

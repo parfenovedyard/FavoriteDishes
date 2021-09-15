@@ -1,4 +1,4 @@
-package com.example.favdish.activities
+package com.example.favdish.view.activities
 
 import android.content.Intent
 import android.os.Build
