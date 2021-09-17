@@ -14,7 +14,8 @@
             android:name=".view.activities.AddUpdateDishActivity"
             android:exported="true"
             android:theme="@style/Theme.FavDish.NoActionBar"
-            android:label="Add Dish"/>
+            android:label="Add Dish"
+            android:configChanges="orientation"/>
         <activity
             android:name=".view.activities.MainActivity"
             android:exported="true" />
