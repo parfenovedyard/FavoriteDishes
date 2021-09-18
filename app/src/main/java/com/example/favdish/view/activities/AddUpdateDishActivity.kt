@@ -1,25 +1,30 @@
 package com.example.favdish.view.activities
 
 import android.Manifest
-import android.app.AlertDialog
+import android.app.Activity
 import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.provider.Settings
-import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.example.favdish.R
 import com.example.favdish.databinding.ActivityAddUpdateDishBinding
 import com.example.favdish.databinding.DialogCustomImageSelectionBinding
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionDeniedResponse
+import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import com.karumi.dexter.listener.single.PermissionListener
 
 class AddUpdateDishActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -52,7 +57,7 @@ class AddUpdateDishActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
     }
-
+    @Suppress("DEPRECATION")
     private fun customImageSelectedDialog() {
         val dialog = Dialog(this)
         val binding: DialogCustomImageSelectionBinding =
@@ -62,15 +67,15 @@ class AddUpdateDishActivity : AppCompatActivity(), View.OnClickListener {
         binding.tvCamera.setOnClickListener {
             Dexter.withContext(this@AddUpdateDishActivity).withPermissions(
                 Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.CAMERA
             ).withListener( object: MultiplePermissionsListener{
                     override fun onPermissionsChecked(p0: MultiplePermissionsReport?) {
-                        if (p0!!.areAllPermissionsGranted()) {
-                            Toast.makeText(this@AddUpdateDishActivity,
-                                "you have camera permission", Toast.LENGTH_SHORT).show()
-                        }else{
-                            showRationalDialogForPermissions()
+                        p0?.let {
+                            if (p0.areAllPermissionsGranted()) {
+
+                                val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                                startActivityForResult(intent, CAMERA)
+                            }
                         }
                     }
 
@@ -85,30 +90,46 @@ class AddUpdateDishActivity : AppCompatActivity(), View.OnClickListener {
         }
 
         binding.tvGallery.setOnClickListener {
-            Dexter.withContext(this@AddUpdateDishActivity).withPermissions(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            ).withListener( object: MultiplePermissionsListener{
-                override fun onPermissionsChecked(p0: MultiplePermissionsReport?) {
-                    if (p0!!.areAllPermissionsGranted()) {
-                        Toast.makeText(this@AddUpdateDishActivity,
-                            "you have gallery permission", Toast.LENGTH_SHORT).show()
-                    }else{
-                        showRationalDialogForPermissions()
-                    }
+            Dexter.withContext(this@AddUpdateDishActivity).withPermission(
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ).withListener( object: PermissionListener {
+                override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
+                    Toast.makeText(this@AddUpdateDishActivity,
+                        "you have gallery permission", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
+                    Toast.makeText(this@AddUpdateDishActivity,
+                        "you don't have gallery permission", Toast.LENGTH_SHORT).show()
                 }
 
                 override fun onPermissionRationaleShouldBeShown(
-                    p0: MutableList<PermissionRequest>?,
+                    p0: PermissionRequest?,
                     p1: PermissionToken?
                 ) {
                     showRationalDialogForPermissions()
                 }
+
             }).onSameThread().check()
             dialog.dismiss()
         }
 
         dialog.show()
+    }
+
+    @Suppress("DEPRECATION")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == CAMERA) {
+                data?.extras?.let {
+                    val thumbnail: Bitmap = data.extras!!.get("data") as Bitmap
+                    binding.ivDishImage.setImageBitmap(thumbnail)
+                    binding.ivAddDishImage.setImageDrawable(ContextCompat.getDrawable(this,
+                    R.drawable.ic_edit_24))
+                }
+            }
+        }
     }
 
     private fun showRationalDialogForPermissions() {
@@ -122,15 +143,17 @@ class AddUpdateDishActivity : AppCompatActivity(), View.OnClickListener {
                     val uri = Uri.fromParts("package", packageName, null)
                     intent.data = uri
                     startActivity(intent)
-                    Log.e("ooops", "showRationaleDialogForPermissions started")
                 } catch (e: ActivityNotFoundException) {
                     e.printStackTrace()
-                    Log.e("ooops", "showRationaleDialogForPermissions not started")
                 }
             }
             .setNegativeButton("Cancel"){ dialog, _ ->
                 dialog.dismiss()
             }.show()
+    }
+
+    companion object{
+        private const val CAMERA = 1
     }
 
 }
