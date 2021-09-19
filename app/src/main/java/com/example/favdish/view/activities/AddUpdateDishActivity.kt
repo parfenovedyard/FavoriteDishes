@@ -11,9 +11,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
-import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.example.favdish.R
 import com.example.favdish.databinding.ActivityAddUpdateDishBinding
@@ -30,6 +31,24 @@ import com.karumi.dexter.listener.single.PermissionListener
 class AddUpdateDishActivity : AppCompatActivity(), View.OnClickListener {
 
     private lateinit var binding: ActivityAddUpdateDishBinding
+
+    private val takeCameraImage = registerForActivityResult(ActivityResultContracts
+        .StartActivityForResult()) { result: ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val thumbnail: Bitmap = result.data!!.extras!!.get("data") as Bitmap
+                binding.ivDishImage.setImageBitmap(thumbnail)
+                binding.ivAddDishImage.setImageDrawable(ContextCompat.getDrawable(this,
+                    R.drawable.ic_edit_24))
+            }
+        }
+    private val takeGalleryImage = registerForActivityResult(ActivityResultContracts
+        .StartActivityForResult()) { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            binding.ivDishImage.setImageURI(result.data!!.data)
+            binding.ivAddDishImage.setImageDrawable(ContextCompat.getDrawable(this,
+                R.drawable.ic_edit_24))
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,7 +77,7 @@ class AddUpdateDishActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
     }
-    @Suppress("DEPRECATION")
+
     private fun customImageSelectedDialog() {
         val dialog = Dialog(this)
         val binding: DialogCustomImageSelectionBinding =
@@ -73,9 +92,7 @@ class AddUpdateDishActivity : AppCompatActivity(), View.OnClickListener {
                     override fun onPermissionsChecked(p0: MultiplePermissionsReport?) {
                         p0?.let {
                             if (p0.areAllPermissionsGranted()) {
-
-                                val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                                startActivityForResult(cameraIntent, CAMERA)
+                                takeCameraImage.launch(Intent(MediaStore.ACTION_IMAGE_CAPTURE))
                             }
                         }
                     }
@@ -95,10 +112,8 @@ class AddUpdateDishActivity : AppCompatActivity(), View.OnClickListener {
                 Manifest.permission.READ_EXTERNAL_STORAGE
             ).withListener( object: PermissionListener {
                 override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
-                   val galleryIntent = Intent(Intent.ACTION_PICK,
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                   )
-                   startActivityForResult(galleryIntent, GALLERY)
+                    takeGalleryImage.launch(Intent(Intent.ACTION_PICK,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI))
                 }
 
                 override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
@@ -120,31 +135,6 @@ class AddUpdateDishActivity : AppCompatActivity(), View.OnClickListener {
         dialog.show()
     }
 
-    @Suppress("DEPRECATION")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == CAMERA) {
-                data?.extras?.let {
-                    val thumbnail: Bitmap = data.extras!!.get("data") as Bitmap
-                    binding.ivDishImage.setImageBitmap(thumbnail)
-                    binding.ivAddDishImage.setImageDrawable(ContextCompat.getDrawable(this,
-                    R.drawable.ic_edit_24))
-                }
-            }
-            if (requestCode == GALLERY) {
-                data?.let {
-                    val selectedPhotoUri = data.data
-                    binding.ivDishImage.setImageURI(selectedPhotoUri)
-                    binding.ivAddDishImage.setImageDrawable(ContextCompat.getDrawable(this,
-                        R.drawable.ic_edit_24))
-                }
-            }
-        }else if (resultCode == Activity.RESULT_CANCELED) {
-            Log.e("cancel", "cancel")
-        }
-    }
-
     private fun showRationalDialogForPermissions() {
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setMessage("You probably turned off permissions, Turn on all in app settings")
@@ -163,11 +153,6 @@ class AddUpdateDishActivity : AppCompatActivity(), View.OnClickListener {
             .setNegativeButton("Cancel"){ dialog, _ ->
                 dialog.dismiss()
             }.show()
-    }
-
-    companion object{
-        private const val CAMERA = 1
-        private const val GALLERY = 2
     }
 
 }
