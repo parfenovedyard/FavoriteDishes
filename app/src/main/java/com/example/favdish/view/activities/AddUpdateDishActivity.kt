@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
 import com.example.favdish.R
 import com.example.favdish.databinding.ActivityAddUpdateDishBinding
 import com.example.favdish.databinding.DialogCustomImageSelectionBinding
@@ -36,7 +37,10 @@ class AddUpdateDishActivity : AppCompatActivity(), View.OnClickListener {
         .StartActivityForResult()) { result: ActivityResult ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val thumbnail: Bitmap = result.data!!.extras!!.get("data") as Bitmap
-                binding.ivDishImage.setImageBitmap(thumbnail)
+                Glide.with(this)
+                        .load(thumbnail)
+                        .centerCrop()
+                        .into(binding.ivDishImage)
                 binding.ivAddDishImage.setImageDrawable(ContextCompat.getDrawable(this,
                     R.drawable.ic_edit_24))
             }
@@ -44,7 +48,10 @@ class AddUpdateDishActivity : AppCompatActivity(), View.OnClickListener {
     private val takeGalleryImage = registerForActivityResult(ActivityResultContracts
         .StartActivityForResult()) { result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK) {
-            binding.ivDishImage.setImageURI(result.data!!.data)
+            Glide.with(this)
+                .load(result.data!!.data)
+                .centerCrop()
+                .into(binding.ivDishImage)
             binding.ivAddDishImage.setImageDrawable(ContextCompat.getDrawable(this,
                 R.drawable.ic_edit_24))
         }
