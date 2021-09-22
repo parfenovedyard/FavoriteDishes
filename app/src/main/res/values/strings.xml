@@ -24,4 +24,6 @@
     <string name="title_select_dish_type">SELECT DISH TYPE</string>
     <string name="title_select_dish_category">SELECT DISH CATEGORY</string>
     <string name="title_select_dish_cooking_time">SELECT DISH COOKING TIME</string>
+
+    <string name="label_no_dishes_added_yet">No dishes added yet!!!</string>
 </resources>
