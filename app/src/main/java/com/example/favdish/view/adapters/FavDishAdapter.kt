@@ -28,7 +28,7 @@ class FavDishAdapter (private val fragment: Fragment):
         holder.tvTitle.text = dish.title
         holder.itemView.setOnClickListener {
             if (fragment is AllDishesFragment) {
-                fragment.dishDetails()
+                fragment.dishDetails(dish)
             }
         }
     }
