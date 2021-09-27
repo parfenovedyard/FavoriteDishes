@@ -1,6 +1,5 @@
 package com.example.favdish.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.*
 import com.example.favdish.model.database.FavDishRepository
 import com.example.favdish.model.entities.FavDish
@@ -13,6 +12,10 @@ class FavDishViewModel(private val repository: FavDishRepository): ViewModel() {
     }
 
     val allDishesList: LiveData<List<FavDish>> = repository.allDishesList.asLiveData()
+
+    fun update(dish: FavDish) = viewModelScope.launch {
+        repository.updateFavDishData(dish)
+    }
 
 }
 
