@@ -18,4 +18,6 @@ class FavDishRepository(private val favDishDao: FavDishDao) {
         favDishDao.updateFavDishDetails(favDish)
     }
 
+    val favoriteDishes: Flow<List<FavDish>> = favDishDao.getFavoriteDishesList()
+
 }
