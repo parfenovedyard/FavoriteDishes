@@ -32,4 +32,8 @@
     <string name="label_no_favorite_dishes_added_yet">No favorite dishes added yet!!!</string>
     <string name="delete_dish">Delete dish</string>
     <string name="edit_dish">Edit dish</string>
+
+    <string name="title_add_dish">Add dish</string>
+    <string name="title_edit_dish">Edit dish</string>
+    <string name="lbl_update_dish">Update dish</string>
 </resources>
