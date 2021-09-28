@@ -1,10 +1,14 @@
 package com.example.favdish.view.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.favdish.R
 import com.example.favdish.databinding.ItemDishLayoutBinding
 import com.example.favdish.model.entities.FavDish
 import com.example.favdish.view.fragments.AllDishesFragment
@@ -35,6 +39,25 @@ class FavDishAdapter (private val fragment: Fragment):
                 fragment.dishDetails(dish)
             }
         }
+        holder.ibMore.setOnClickListener {
+            val popup = PopupMenu(fragment.context, holder.ibMore)
+            popup.menuInflater.inflate(R.menu.menu_adapter, popup.menu)
+            popup.setOnMenuItemClickListener {
+                if (it.itemId == R.id.action_edit_dish) {
+                    Log.e("ups", "edit ${dish.title}")
+                } else if (it.itemId == R.id.action_delete_dish) {
+                    Log.e("ups", "delete ${dish.title}")
+                }
+                true
+            }
+            popup.show()
+        }
+
+        if (fragment is AllDishesFragment) {
+            holder.ibMore.visibility = View.VISIBLE
+        } else if (fragment is FavoriteDishesFragment) {
+            holder.ibMore.visibility = View.GONE
+        }
     }
 
     override fun getItemCount(): Int {
@@ -49,5 +72,6 @@ class FavDishAdapter (private val fragment: Fragment):
     class ViewHolder(view: ItemDishLayoutBinding) : RecyclerView.ViewHolder(view.root) {
         val ivDishImage = view.ivDishImage
         val tvTitle = view.tvDishTitle
+        val ibMore = view.ibMore
     }
 }
