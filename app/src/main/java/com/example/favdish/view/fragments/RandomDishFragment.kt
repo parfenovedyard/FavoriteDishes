@@ -43,6 +43,9 @@ class RandomDishFragment : Fragment() {
         mRandomDishViewModel = ViewModelProvider(this).get(RandomDishViewModel::class.java)
         mRandomDishViewModel.getRandomRecipeFromApi()
         randomDishViewModelObserver()
+        binding!!.srlRandomDish.setOnRefreshListener {
+            mRandomDishViewModel.getRandomRecipeFromApi()
+        }
     }
 
     private fun randomDishViewModelObserver() {
@@ -50,12 +53,18 @@ class RandomDishFragment : Fragment() {
             randomDishResponse?.let {
                 Log.i("ups", "${randomDishResponse.recipes[0]}")
                 Log.i("ups", "${randomDishResponse.recipes[0].extendedIngredients}")
+                if (binding!!.srlRandomDish.isRefreshing) {
+                    binding!!.srlRandomDish.isRefreshing = false
+                }
                 setRandomDishResponseInUI(randomDishResponse.recipes[0])
             }
         })
         mRandomDishViewModel.randomDishLoadingError.observe(viewLifecycleOwner,{ dataError ->
             dataError?.let {
                 Log.e("ups", "$dataError")
+                if (binding!!.srlRandomDish.isRefreshing) {
+                    binding!!.srlRandomDish.isRefreshing = false
+                }
             }
         })
         mRandomDishViewModel.loadRandomDish.observe(viewLifecycleOwner,{ loadRandomDish ->
@@ -70,7 +79,7 @@ class RandomDishFragment : Fragment() {
             .load(recipe.image)
             .centerCrop()
             .into(binding!!.ivDishImageRandom)
-        var dishType: String = "other"
+        var dishType = "other"
         if (recipe.dishTypes.isNotEmpty()) {
             dishType = recipe.dishTypes[0]
             binding!!.tvTypeRandom.text = dishType
@@ -79,10 +88,10 @@ class RandomDishFragment : Fragment() {
 
         var ingredients = ""
         for (value in recipe.extendedIngredients) {
-            if (ingredients.isNotEmpty()) {
-                ingredients = value.original
+            ingredients = if (ingredients.isNotEmpty()) {
+                value.original
             }else{
-                ingredients = ingredients + ", \n" + value.original
+                ingredients + ", \n" + value.original
             }
         }
         binding!!.tvIngredientsRandom.text = ingredients
@@ -97,30 +106,41 @@ class RandomDishFragment : Fragment() {
             binding!!.tvCookingDirectionRandom.text = Html.fromHtml(recipe.instructions)
         }
 
+        binding!!.ivFavoriteDishRandom.setImageDrawable(
+            ContextCompat.getDrawable(requireActivity(),R.drawable.ic_favorite_unselected)
+        )
+        var addedToFavorite = false
+
         binding!!.tvCookingTimeRandom.text = resources.getString(R.string.lbl_estimate_cooking_time,
         recipe.readyInMinutes.toString())
 
         binding!!.ivFavoriteDishRandom.setOnClickListener {
-            val randomDishDetails = FavDish(
-                recipe.image,
-                Constants.DISH_IMAGE_SOURCE_ONLINE,
-                recipe.title,
-                dishType,
-                "Other",
-                ingredients,
-                recipe.readyInMinutes.toString(),
-                recipe.instructions,
-                true
-            )
-            val mFavDishViewModel: FavDishViewModel by viewModels {
-                FavDishViewModelFactory((requireActivity()
-                    .application as FavDishApplication).repository)
+            if (addedToFavorite) {
+                Toast.makeText(requireActivity(), resources.getString(R.string.msg_added_to_favorite)
+                    , Toast.LENGTH_SHORT).show()
+            }else{
+                val randomDishDetails = FavDish(
+                    recipe.image,
+                    Constants.DISH_IMAGE_SOURCE_ONLINE,
+                    recipe.title,
+                    dishType,
+                    "Other",
+                    ingredients,
+                    recipe.readyInMinutes.toString(),
+                    recipe.instructions,
+                    true
+                )
+                val mFavDishViewModel: FavDishViewModel by viewModels {
+                    FavDishViewModelFactory((requireActivity()
+                        .application as FavDishApplication).repository)
+                }
+                mFavDishViewModel.insert(randomDishDetails)
+                addedToFavorite = true
+                binding!!.ivFavoriteDishRandom.setImageDrawable(
+                    ContextCompat.getDrawable(requireActivity(), R.drawable.ic_favorite_selected)
+                )
+                Toast.makeText(requireActivity(), "Add to favorites", Toast.LENGTH_SHORT).show()
             }
-            mFavDishViewModel.insert(randomDishDetails)
-            binding!!.ivFavoriteDishRandom.setImageDrawable(
-                ContextCompat.getDrawable(requireActivity(), R.drawable.ic_favorite_selected)
-            )
-            Toast.makeText(requireActivity(), "Add to favorites", Toast.LENGTH_SHORT).show()
         }
     }
 

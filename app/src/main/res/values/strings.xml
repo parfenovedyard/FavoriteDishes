@@ -42,4 +42,6 @@
     <string name="lbl_yes">Yes</string>
     <string name="lbl_no">No</string>
     <string name="select_item_to_filter">Select item to filter</string>
+
+    <string name="msg_added_to_favorite">You have already added the dish to your favorites</string>
 </resources>
