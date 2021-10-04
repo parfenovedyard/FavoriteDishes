@@ -1,5 +1,6 @@
 package com.example.favdish.view.fragments
 
+import android.app.Dialog
 import android.os.Build
 import android.os.Bundle
 import android.text.Html
@@ -28,14 +29,24 @@ class RandomDishFragment : Fragment() {
 
     private var binding: FragmentRandomDishBinding? = null
     private lateinit var mRandomDishViewModel: RandomDishViewModel
-    // This property is only valid between onCreateView and
-    // onDestroyView.
+    private var mProgressDialog: Dialog? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentRandomDishBinding.inflate(layoutInflater)
         return binding!!.root
+    }
+
+    private fun showCustomProgressDialog() {
+        mProgressDialog = Dialog(requireActivity())
+        mProgressDialog?.let {
+            it.setContentView(R.layout.dialog_custom_progress)
+            it.show()
+        }
+    }
+    private fun hideCustomProgressDialog() {
+        mProgressDialog?.dismiss()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -70,6 +81,11 @@ class RandomDishFragment : Fragment() {
         mRandomDishViewModel.loadRandomDish.observe(viewLifecycleOwner,{ loadRandomDish ->
             loadRandomDish?.let {
                 Log.e("ups", "$loadRandomDish")
+                if (loadRandomDish && !binding!!.srlRandomDish.isRefreshing) {
+                    showCustomProgressDialog()
+                }else{
+                    hideCustomProgressDialog()
+                }
             }
         })
     }
