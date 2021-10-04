@@ -80,20 +80,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tv_category_random"
-                android:layout_margin="@dimen/_10sdp"
+                android:layout_marginStart="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginEnd="@dimen/_10sdp"
+                android:layout_marginBottom="@dimen/_10sdp"
                 android:text="@string/lbl_ingredients"
-                android:textSize="@dimen/_16sdp"
                 android:textColor="@color/blue_grey_900"
+                android:textSize="@dimen/_16sdp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_ingredients_random"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/grey_900"
+                android:layout_below="@id/tv_ingredients_label_random"
                 android:layout_marginStart="@dimen/_16sdp"
                 android:layout_marginEnd="@dimen/_16sdp"
-                android:layout_below="@id/tv_ingredients_label_random"
+                android:textColor="@color/grey_900"
                 android:textSize="@dimen/_14sdp"
                 tools:text="Ingredients Value" />
 
