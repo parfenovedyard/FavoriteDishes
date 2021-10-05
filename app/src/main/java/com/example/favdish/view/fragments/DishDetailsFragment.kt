@@ -144,7 +144,7 @@ class DishDetailsFragment : Fragment() {
                 it.dishDetails.type.capitalize(Locale.ROOT)
             binding!!.tvCategory.text = it.dishDetails.category
             binding!!.tvIngredients.text = it.dishDetails.ingredients
-            //binding!!.tvCookingDirection.text = it.dishDetails.directionToCook
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 binding!!.tvCookingDirection.text = Html.fromHtml(
                     it.dishDetails.directionToCook,
