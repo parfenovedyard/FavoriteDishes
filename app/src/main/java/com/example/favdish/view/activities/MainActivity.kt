@@ -13,6 +13,7 @@ import androidx.work.*
 import com.example.favdish.R
 import com.example.favdish.databinding.ActivityMainBinding
 import com.example.favdish.model.notification.NotifyWorker
+import com.example.favdish.utils.Constants
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
@@ -31,11 +32,18 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_all_dishes, R.id.navigation_favorite_dishes, R.id.navigation_random_dish
+                R.id.navigation_all_dishes,
+                R.id.navigation_favorite_dishes,
+                R.id.navigation_random_dish
             )
         )
         setupActionBarWithNavController(mNavController, appBarConfiguration)
         binding.navView.setupWithNavController(mNavController)
+
+        if (intent.hasExtra(Constants.NOTIFICATION_ID)) {
+            val notificationId = intent.getIntExtra(Constants.NOTIFICATION_ID, 0)
+            binding.navView.selectedItemId = R.id.navigation_random_dish
+        }
 
         startWork()
     }
@@ -47,15 +55,18 @@ class MainActivity : AppCompatActivity() {
         .build()
 
     private fun createWorkRequest() = PeriodicWorkRequestBuilder<NotifyWorker>(
-        15, TimeUnit.MINUTES)
+        15, TimeUnit.MINUTES
+    )
         .setConstraints(createConstraints())
         .build()
 
     private fun startWork() {
         WorkManager.getInstance(this)
-            .enqueueUniquePeriodicWork("FavDish Notify Work",
-            ExistingPeriodicWorkPolicy.KEEP,
-            createWorkRequest())
+            .enqueueUniquePeriodicWork(
+                "FavDish Notify Work",
+                ExistingPeriodicWorkPolicy.KEEP,
+                createWorkRequest()
+            )
     }
 
     override fun onSupportNavigateUp(): Boolean {
